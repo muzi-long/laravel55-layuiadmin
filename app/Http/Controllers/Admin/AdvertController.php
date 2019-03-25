@@ -6,7 +6,7 @@ use App\Models\Advert;
 use App\Models\Position;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Http\Requests\AdvertRequest;
 class AdvertController extends Controller
 {
     /**
@@ -26,10 +26,13 @@ class AdvertController extends Controller
         if ($request->get('position_id')){
             $model = $model->where('position_id',$request->get('position_id'));
         }
-        if ($request->get('title')){
-            $model = $model->where('title','like','%'.$request->get('title').'%');
+        if ($request->has('title') && !is_null($request->get('title'))) {
+            $title = str_replace("%", "\%", $request->get('title')); // 把 '%'过滤掉
+            $title = nl2br($title); // 回车转换
+            $title = htmlspecialchars($title);
+            $model = $model->where('title', 'like', '%' . $title . '%');
         }
-        $res = $model->orderBy('sort','desc')->orderBy('id','desc')->with('position')->paginate($request->get('limit',30))->toArray();
+        $res = $model->orderBy($request->get('field','sort'),$request->get('order','desc'))->with('position')->paginate($request->get('limit',30))->toArray();
         $data = [
             'code' => 0,
             'msg'   => '正在请求中...',
@@ -57,7 +60,7 @@ class AdvertController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(AdvertRequest $request)
     {
         $this->validate($request,[
             'title'  => 'required|string',
@@ -92,11 +95,9 @@ class AdvertController extends Controller
     {
         $advert = Advert::findOrFail($id);
         //所有广告位置
-        $positions = Position::orderBy('sort','desc')->get();
-        foreach ($positions as $position){
-            $position->selected = $position->id == $advert->position_id ? 'selected' : '';
-        }
-        return view('admin.advert.edit',compact('positions','advert'));
+        $positions = Position::orderBy('sort', 'desc')->get();
+        $position_id = $advert->position_id;
+        return view('admin.advert.edit', compact('positions', 'advert','position_id'));
     }
 
     /**
@@ -116,7 +117,7 @@ class AdvertController extends Controller
         ]);
         $advert = Advert::findOrFail($id);
         if ($advert->update($request->all())){
-            return redirect(route('admin.advert'))->with(['status'=>'更新成功']);
+            return redirect(route('admin.advert.edit',[$id]))->with(['status'=>'更新成功']);
         }
         return redirect(route('admin.advert'))->withErrors(['status'=>'系统错误']);
     }

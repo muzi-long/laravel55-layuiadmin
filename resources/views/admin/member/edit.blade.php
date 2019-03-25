@@ -15,6 +15,3 @@
     </div>
 @endsection
 
-@section('script')
-    @include('admin.member._js')
-@endsection

@@ -89,6 +89,19 @@
 <div class="layui-form-item">
     <div class="layui-input-block">
         <button type="submit" class="layui-btn" lay-submit="" lay-filter="formDemo">确 认</button>
-        <a  class="layui-btn" href="{{route('admin.article')}}" >返 回</a>
+        <div  class="layui-btn close-iframe"  >关闭</div>
     </div>
 </div>
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script>
+    $('.close-iframe').on('click',function () {
+        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+        parent.layer.close(index); //再执行关闭
+    });
+
+    @if(session('status'))
+    var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+    parent.layer.close(index); //再执行关闭
+    parent.layer.msg("{{session('status')}}",{icon:6});
+    @endif
+</script>

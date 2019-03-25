@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\Site;
 use App\Traits\Msg;
 use Illuminate\Http\Request;
 use zgldh\QiniuStorage\QiniuStorage;
@@ -11,11 +12,12 @@ class PublicController extends Controller
     //图片上传处理
     public function uploadImg(Request $request)
     {
-
+        $all_config = Site::pluck('value','key');
         //上传文件最大大小,单位M
-        $maxSize = 10;
+        $maxSize = $all_config['img_size']?$all_config['img_size']:10;
         //支持的上传图片类型
-        $allowed_extensions = ["png", "jpg", "gif"];
+        $type = explode(';',$all_config['img_type']);
+        $allowed_extensions = empty($type)?["png", "jpg", "gif"]:$type;
         //返回信息json
         $data = ['code'=>200, 'msg'=>'上传失败', 'data'=>''];
         $file = $request->file('file');

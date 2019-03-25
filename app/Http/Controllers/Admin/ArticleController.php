@@ -33,7 +33,9 @@ class ArticleController extends Controller
         if ($request->get('title')){
             $model = $model->where('title','like','%'.$request->get('title').'%');
         }
-        $res = $model->orderBy('created_at','desc')->with(['tags','category'])->paginate($request->get('limit',30))->toArray();
+        $res = $model->orderBy($request->get('field','id'),$request->get('order','desc'))->with(['tags','category'])->paginate($request->get('limit',30))->toArray();
+
+
         $data = [
             'code' => 0,
             'msg'   => '正在请求中...',
@@ -66,11 +68,17 @@ class ArticleController extends Controller
     public function store(ArticleRequest $request)
     {
         $data = $request->only(['category_id','title','keywords','description','content','thumb','click']);
+
+        $find_child = Category::with('childs')->where('parent_id',$data['category_id'])->get();
+        if($find_child->count()){
+            return redirect(route('admin.article.create'))->withErrors(['status'=>'【添加】【编辑】只允许选择最底层文章类别']);
+        }
+
         $article = Article::create($data);
         if ($article && !empty($request->get('tags')) ){
             $article->tags()->sync($request->get('tags'));
         }
-        return redirect(route('admin.article'))->with(['status'=>'添加成功']);
+        return redirect(route('admin.article.create'))->with(['status'=>'添加成功']);
     }
 
     /**
@@ -118,9 +126,16 @@ class ArticleController extends Controller
     {
         $article = Article::with('tags')->findOrFail($id);
         $data = $request->only(['category_id','title','keywords','description','content','thumb','click']);
+
+        $find_child = Category::with('childs')->where('parent_id',$data['category_id'])->get();
+        if($find_child->count()){
+            return redirect(route('admin.article.edit',[$id]))->withErrors(['status'=>'【添加】【编辑】只允许选择最底层文章类别']);
+        }
+
         if ($article->update($data)){
             $article->tags()->sync($request->get('tags',[]));
-            return redirect(route('admin.article'))->with(['status'=>'更新成功']);
+
+            return redirect(route('admin.article.edit',[$id]))->with(['status'=>'更新成功']);
         }
         return redirect(route('admin.article'))->withErrors(['status'=>'系统错误']);
     }

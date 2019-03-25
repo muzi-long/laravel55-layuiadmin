@@ -4,11 +4,8 @@
     <div class="layui-card">
         <div class="layui-card-header layuiadmin-card-header-auto">
             <div class="layui-btn-group ">
-                @can('system.permission.destroy')
-                    <button class="layui-btn layui-btn-sm layui-btn-danger" id="listDelete">删 除</button>
-                @endcan
                 @can('system.permission.create')
-                    <a class="layui-btn layui-btn-sm" href="{{ route('admin.permission.create') }}">添 加</a>
+                            <a class="layui-btn layui-btn-sm" href="{{ route('admin.permission.create') }}" id="add_permission">添 加</a>
                 @endcan
                 <button class="layui-btn layui-btn-sm" id="returnParent" pid="0">返回上级</button>
             </div>
@@ -16,7 +13,9 @@
         <div class="layui-card-body">
             <table id="dataTable" lay-filter="dataTable"></table>
             <script type="text/html" id="icon">
+                @{{# if(d.icon_id!==null) {}}
                 <i class="layui-icon @{{ d.icon.class }}"></i>
+                @{{# } }}
             </script>
             <script type="text/html" id="options">
                 <div class="layui-btn-group">
@@ -38,6 +37,13 @@
 @section('script')
     @can('system.permission')
     <script>
+        (function($){
+            var pid =$("#returnParent").attr('pid');
+            if(pid == 0){
+                $("#returnParent").hide();
+            }
+           
+        })(jQuery)
         layui.use(['layer','table','form'],function () {
             var layer = layui.layer;
             var form = layui.form;
@@ -48,10 +54,27 @@
                 ,height: 500
                 ,url: "{{ route('admin.data') }}" //数据接口
                 ,where:{model:"permission"}
-                ,page: true //开启分页
+                ,page: true
+                ,done: function(res, curr, count){
+                    //接口回调，处理一些和表格相关的辅助事项
+                   $("#add_permission").attr('href','/admin/permission/create?parent_id='+res.parent_id);
+                    //接口回调，处理一些和表格相关的辅助事项
+                    if(res.data.length==0 && count>0){
+                        var page_now;
+                        if(curr-1>0){
+                            page_now =curr-1;
+                        }else{
+                            page_now = 1 ;
+                        }
+                        dataTable.reload({
+                            page: {
+                                curr: page_now
+                            }
+                        });
+                    }
+                }
                 ,cols: [[ //表头
-                    {checkbox: true,fixed: true}
-                    ,{field: 'id', title: 'ID', sort: true,width:80}
+                    {field: 'id', title: 'ID', sort:true,width:80}
                     ,{field: 'name', title: '权限名称'}
                     ,{field: 'display_name', title: '显示名称'}
                     ,{field: 'route', title: '路由'}
@@ -71,14 +94,24 @@
                         $.post("{{ route('admin.permission.destroy') }}",{_method:'delete',ids:[data.id]},function (result) {
                             if (result.code==0){
                                 obj.del(); //删除对应行（tr）的DOM结构
+                                dataTable.reload();
                             }
                             layer.close(index);
                             layer.msg(result.msg,{icon:6})
                         });
                     });
                 } else if(layEvent === 'edit'){
-                    location.href = '/admin/permission/'+data.id+'/edit';
+                    layer.open({
+                        type: 2,
+                        title:'编辑权限',
+                        shadeClose:true, area: ['100%', '100%'],
+                        content:  '/admin/permission/'+data.id+'/edit',
+                        end:function () {
+                            dataTable.reload();
+                        }
+                    });
                 } else if (layEvent === 'children'){
+                    $("#returnParent").show();
                     var pid = $("#returnParent").attr("pid");
                     if (data.parent_id!=0){
                         $("#returnParent").attr("pid",pid+'_'+data.parent_id);
@@ -124,6 +157,7 @@
                     $(this).attr("pid",ids.join('_'));
                 }else {
                     parent_id=pid;
+                    $(this).hide();
                 }
                 dataTable.reload({
                     where:{model:"permission",parent_id:parent_id},

@@ -13,7 +13,3 @@
         </div>
     </div>
 @endsection
-
-@section('script')
-    @include('admin.advert._js')
-@endsection

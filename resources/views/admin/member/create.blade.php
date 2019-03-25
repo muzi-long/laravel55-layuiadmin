@@ -6,12 +6,10 @@
             <h2>添加用户</h2>
         </div>
         <div class="layui-card-body">
-            <form class="layui-form" action="{{route('admin.member.store')}}" method="post">
+            <form class="layui-form" action="{{route('admin.member.store')}}" method="post" onsubmit="return dosubmit()">
                 @include('admin.member._form')
             </form>
         </div>
     </div>
 @endsection
-@section('script')
-    @include('admin.member._js')
-@endsection
+

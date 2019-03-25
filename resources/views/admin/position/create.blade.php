@@ -6,7 +6,7 @@
             <h2>添加广告位</h2>
         </div>
         <div class="layui-card-body">
-            <form class="layui-form" action="{{route('admin.position.store')}}" method="post">
+            <form class="layui-form" action="{{route('admin.position.store')}}" method="post" onsubmit="return dosubmit()">
                 @include('admin.position._form')
             </form>
         </div>

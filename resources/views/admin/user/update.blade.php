@@ -6,40 +6,40 @@
         {{csrf_field()}}
         {{method_field('put')}}
         <div class="layui-form-item">
-            <label for="" class="layui-form-label">昵&nbsp;&nbsp;&nbsp;称</label>
+            <label for="" class="layui-form-label">登录账号:</label>
             <div class="layui-input-inline">
                 <input type="text" name="nickname" value="{{$user->nickname}}" required="" lay-verify="required" placeholder="请输入昵称" autocomplete="off" class="layui-input" >
             </div>
         </div>
         <div class="layui-form-item">
-            <label for="" class="layui-form-label">邮&nbsp;&nbsp;&nbsp;箱</label>
+            <label for="" class="layui-form-label">电子邮箱:</label>
             <div class="layui-input-inline">
                 <input type="email" name="email" value="{{$user->email}}" required="" lay-verify="required" placeholder="请输入Email" autocomplete="off" class="layui-input" >
             </div>
         </div>
         <div class="layui-form-item">
-            <label for="" class="layui-form-label">用户名</label>
+            <label for="" class="layui-form-label">真实姓名:</label>
             <div class="layui-input-inline">
-                <input type="text" name="name" value="{{$user->name}}" required="" lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+                <input type="text" name="name" value="{{$user->realname}}" required="" lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
-            <label for="" class="layui-form-label">手机号</label>
+            <label for="" class="layui-form-label">联系电话:</label>
             <div class="layui-input-inline">
                 <input type="text" name="tel" value="{{$user->tel}}" required="" lay-verify="required" placeholder="请输入手机号" autocomplete="off" class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
-            <label for="" class="layui-form-label">密&nbsp;&nbsp;&nbsp;码</label>
+            <label for="" class="layui-form-label">登录密码:</label>
             <div class="layui-input-inline">
-                <input type="password" id="password" name="password" placeholder="请输入密码" autocomplete="off" class="layui-input">
+                <input type="password" id="password" name="password" placeholder="请输入新密码" autocomplete="off" class="layui-input">
             </div>
             <div class="layui-form-mid layui-word-aux">不修改密码则留空</div>
         </div>
         <div class="layui-form-item">
-            <label for="" class="layui-form-label">确&nbsp;&nbsp;&nbsp;认</label>
+            <label for="" class="layui-form-label">确认密码:</label>
             <div class="layui-input-inline">
-                <input type="password" id="password_confirmation" name="password_confirmation" placeholder="请输入密码" autocomplete="off" class="layui-input">
+                <input type="password" id="password_confirmation" name="password_confirmation" placeholder="请再次输入新密码" autocomplete="off" class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">

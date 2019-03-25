@@ -28,7 +28,7 @@ class MemberController extends Controller
         if ($request->get('phone')){
             $model = $model->where('phone','like','%'.$request->get('phone').'%');
         }
-        $res = $model->orderBy('created_at','desc')->paginate($request->get('limit',30))->toArray();
+        $res = $model->orderBy($request->get('field','created_at'),$request->get('order','desc'))->paginate($request->get('limit',30))->toArray();
         $data = [
             'code' => 0,
             'msg'   => '正在请求中...',
@@ -88,7 +88,7 @@ class MemberController extends Controller
             $data['password'] = bcrypt($request->get('password'));
         }
         if ($member->update($data)){
-            return redirect()->to(route('admin.member'))->with(['status'=>'更新用户成功']);
+            return redirect()->to(route('admin.member.edit',[$id]))->with(['status'=>'更新用户成功']);
         }
         return redirect()->to(route('admin.member'))->withErrors('系统错误');
     }

@@ -6,7 +6,7 @@
             <h2>添加分类</h2>
         </div>
         <div class="layui-card-body">
-            <form class="layui-form" action="{{route('admin.category.store')}}" method="post">
+            <form class="layui-form" action="{{route('admin.category.store')}}" method="post" onsubmit="return dosubmit()">
                 @include('admin.category._form')
             </form>
         </div>

@@ -36,20 +36,23 @@ Route::group(['namespace'=>'Admin','prefix'=>'admin','middleware'=>'auth'],funct
 });
 
 //系统管理
-Route::group(['namespace'=>'Admin','prefix'=>'admin','middleware'=>['auth','permission:system.manage']],function (){
+Route::group(['namespace'=>'Admin','prefix'=>'admin','middleware'=>['auth','operation.log','permission:system.manage']],function (){
     //数据表格接口
     Route::get('data','IndexController@data')->name('admin.data')->middleware('permission:system.role|system.user|system.permission');
+    
     //用户管理
     Route::group(['middleware'=>['permission:system.user']],function (){
         Route::get('user','UserController@index')->name('admin.user');
         //添加
         Route::get('user/create','UserController@create')->name('admin.user.create')->middleware('permission:system.user.create');
         Route::post('user/store','UserController@store')->name('admin.user.store')->middleware('permission:system.user.create');
+        
         //编辑
         Route::get('user/{id}/edit','UserController@edit')->name('admin.user.edit')->middleware('permission:system.user.edit');
         Route::put('user/{id}/update','UserController@update')->name('admin.user.update')->middleware('permission:system.user.edit');
         //删除
         Route::delete('user/destroy','UserController@destroy')->name('admin.user.destroy')->middleware('permission:system.user.destroy');
+        
         //分配角色
         Route::get('user/{id}/role','UserController@role')->name('admin.user.role')->middleware('permission:system.user.role');
         Route::put('user/{id}/assignRole','UserController@assignRole')->name('admin.user.assignRole')->middleware('permission:system.user.role');
@@ -57,6 +60,7 @@ Route::group(['namespace'=>'Admin','prefix'=>'admin','middleware'=>['auth','perm
         Route::get('user/{id}/permission','UserController@permission')->name('admin.user.permission')->middleware('permission:system.user.permission');
         Route::put('user/{id}/assignPermission','UserController@assignPermission')->name('admin.user.assignPermission')->middleware('permission:system.user.permission');
     });
+
     //角色管理
     Route::group(['middleware'=>'permission:system.role'],function (){
         Route::get('role','RoleController@index')->name('admin.role');
@@ -84,19 +88,17 @@ Route::group(['namespace'=>'Admin','prefix'=>'admin','middleware'=>['auth','perm
         //删除
         Route::delete('permission/destroy','PermissionController@destroy')->name('admin.permission.destroy')->middleware('permission:system.permission.destroy');
     });
-    //菜单管理
-    Route::group(['middleware'=>'permission:system.menu'],function (){
-        Route::get('menu','MenuController@index')->name('admin.menu');
-        Route::get('menu/data','MenuController@data')->name('admin.menu.data');
-        //添加
-        Route::get('menu/create','MenuController@create')->name('admin.menu.create')->middleware('permission:system.menu.create');
-        Route::post('menu/store','MenuController@store')->name('admin.menu.store')->middleware('permission:system.menu.create');
-        //编辑
-        Route::get('menu/{id}/edit','MenuController@edit')->name('admin.menu.edit')->middleware('permission:system.menu.edit');
-        Route::put('menu/{id}/update','MenuController@update')->name('admin.menu.update')->middleware('permission:system.menu.edit');
-        //删除
-        Route::delete('menu/destroy','MenuController@destroy')->name('admin.menu.destroy')->middleware('permission:system.menu.destroy');
+    //登录日志管理
+    Route::group(['middleware' => 'permission:system.login_log'], function () {
+        Route::get('login_log', 'LoginLogController@index')->name('admin.login_log');
+        Route::delete('login_log/destroy', 'LoginLogController@destroy')->name('admin.login_log.destroy')->middleware('permission:system.login_log.destroy');
     });
+    //操作日志管理
+    Route::group(['middleware' => 'permission:system.operation_log'], function () {
+        Route::get('operation_log', 'OperationLogController@index')->name('admin.operation_log');
+        Route::delete('operation_log/destroy', 'OperationLogController@destroy')->name('admin.operation_log.destroy')->middleware('permission:system.operation_log.destroy');
+    });
+
 });
 
 
@@ -107,7 +109,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['aut
         Route::get('category/data', 'CategoryController@data')->name('admin.category.data');
         Route::get('category', 'CategoryController@index')->name('admin.category');
         //添加分类
-        Route::get('category/create', 'CategoryController@create')->name('admin.category.create')->middleware('permission:zixun.category.create');
+        Route::get('category/create/{id?}', 'CategoryController@create')->name('admin.category.create')->middleware('permission:zixun.category.create');
         Route::post('category/store', 'CategoryController@store')->name('admin.category.store')->middleware('permission:zixun.category.create');
         //编辑分类
         Route::get('category/{id}/edit', 'CategoryController@edit')->name('admin.category.edit')->middleware('permission:zixun.category.edit');
@@ -142,8 +144,9 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['aut
         Route::delete('tag/destroy', 'TagController@destroy')->name('admin.tag.destroy')->middleware('permission:zixun.tag.destroy');
     });
 });
+
 //配置管理
-Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['auth', 'permission:config.manage']], function () {
+Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['auth', 'permission:config.manage','operation.log']], function () {
     //站点配置
     Route::group(['middleware' => 'permission:config.site'], function () {
         Route::get('site', 'SiteController@index')->name('admin.site');
@@ -176,6 +179,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['aut
         Route::delete('advert/destroy', 'AdvertController@destroy')->name('admin.advert.destroy')->middleware('permission:config.advert.destroy');
     });
 });
+
 //会员管理
 Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['auth', 'permission:member.manage']], function () {
     //账号管理
@@ -192,6 +196,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['aut
         Route::delete('member/destroy', 'MemberController@destroy')->name('admin.member.destroy')->middleware('permission:member.member.destroy');
     });
 });
+
 //消息管理
 Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['auth', 'permission:message.manage']], function () {
     //消息管理
@@ -209,6 +214,21 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['aut
         Route::post('message/{id}/read', 'MessageController@read')->name('admin.message.read')->middleware('permission:message.message.mine');
 
         Route::get('message/count', 'MessageController@getMessageCount')->name('admin.message.get_count');
+    });
+
+});
+
+//地区管理
+Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['auth', 'permission:districts.manage','operation.log']], function () {
+
+    //地区管理
+    Route::group(['middleware' => 'permission:districts.dislist'], function () {
+        Route::get('districts/data', 'DistrictsController@data')->name('admin.dislist.data');
+        Route::get('districts', 'DistrictsController@index')->name('admin.dislist');
+
+        Route::put('/change', 'DistrictsController@changeAction')->name('admin.dislist.change')->middleware('permission:districts.dislist.edit');
+        Route::put('/status', 'DistrictsController@statusAction')->name('admin.dislist.status')->middleware('permission:districts.dislist.edit');
+
     });
 
 });

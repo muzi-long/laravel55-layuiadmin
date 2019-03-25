@@ -15,7 +15,8 @@
         "spatie/laravel-permission": "^2.12",
         "stevenyangecho/laravel-u-editor": "^1.4",
         "yansongda/laravel-pay": "^2.0",
-        "zgldh/qiniu-laravel-storage": "^0.9.2"
+        "zgldh/qiniu-laravel-storage": "^0.9.2",
+        "maatwebsite/excel":"~2.1.0"
     },
     "require-dev": {
         "filp/whoops": "~2.0",
@@ -31,7 +32,10 @@
         ],
         "psr-4": {
             "App\\": "app/"
-        }
+        },
+        "files":[
+            "app/Helper/functions.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

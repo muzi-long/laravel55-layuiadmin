@@ -61,5 +61,8 @@ class Kernel extends HttpKernel
         'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
         'role'       => \Spatie\Permission\Middlewares\RoleMiddleware::class,
         'member' => \App\Http\Middleware\Member::class,
+
+        'operation.log' => \App\Http\Middleware\OperationLog::class,
+        'safe' => \App\Http\Middleware\CheckSafe::class
     ];
 }

@@ -14,7 +14,7 @@
             <h2>角色 【{{$role->name}}】分配权限</h2>
         </div>
         <div class="layui-card-body">
-            <form action="{{route('admin.role.assignPermission',['role'=>$role])}}" method="post" class="layui-form">
+            <form action="{{route('admin.role.assignPermission',['role'=>$role])}}" method="post" class="layui-form" onsubmit="return dosubmit()">
                 {{csrf_field()}}
                 {{method_field('put')}}
                 @forelse($permissions as $first)
@@ -44,7 +44,7 @@
                 @endforelse
                 <div class="layui-form-item">
                     <button type="submit" class="layui-btn" lay-submit="" >确 认</button>
-                    <a href="{{route('admin.role')}}"  class="layui-btn" >返 回</a>
+                    <div  class="layui-btn close-iframe" onclick="close_parent(true)">>关闭</div>
                 </div>
 
             </form>
@@ -55,10 +55,7 @@
 @section('script')
     <script type="text/javascript">
         layui.use(['layer','table','form'],function () {
-            var layer = layui.layer;
             var form = layui.form;
-            var table = layui.table;
-
             form.on('checkbox', function (data) {
                 var check = data.elem.checked;//是否选中
                 var checkId = data.elem.id;//当前操作的选项框
@@ -98,7 +95,8 @@
                 }
                 form.render();
             });
-        })
+        });
     </script>
+    @include('admin.common_edit')
 @endsection
 

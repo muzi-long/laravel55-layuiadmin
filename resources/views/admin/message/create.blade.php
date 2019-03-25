@@ -1,12 +1,11 @@
 @extends('admin.base')
-
 @section('content')
     <div class="layui-card">
         <div class="layui-card-header layuiadmin-card-header-auto">
             <h2>推送消息</h2>
         </div>
         <div class="layui-card-body">
-            <form class="layui-form" action="{{route('admin.message.store')}}" method="post">
+            <form class="layui-form" action="{{route('admin.message.store')}}" method="post" onsubmit="return dosubmit()">
                 {{csrf_field()}}
                 <div class="layui-form-item">
                     <label for="" class="layui-form-label">标题</label>

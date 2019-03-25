@@ -20,7 +20,8 @@ class CategoryController extends Controller
 
     public function data(Request $request)
     {
-        $res = Category::where('parent_id',$request->get('parent_id',0))->orderBy('id','desc')->orderBy('sort','desc')->paginate($request->get('limit',30))->toArray();
+
+        $res = Category::where('parent_id',$request->get('parent_id',0))->orderBy($request->get('field','sort'),$request->get('order','desc'))->orderBy('id','asc')->paginate($request->get('limit',30))->toArray();
         $data = [
             'code' => 0,
             'msg'   => '正在请求中...',
@@ -35,10 +36,10 @@ class CategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($id)
     {
         $categorys = $this->tree(Category::get()->toArray());
-        return view('admin.category.create',compact('categorys'));
+        return view('admin.category.create',compact('categorys','id'));
     }
 
     /**
@@ -55,7 +56,7 @@ class CategoryController extends Controller
             'parent_id' => 'required|numeric'
         ]);
         if (Category::create($request->all())){
-            return redirect(route('admin.category'))->with(['status'=>'添加完成']);
+            return redirect(route('admin.category.create',0))->with(['status'=>'添加完成']);
         }
         return redirect(route('admin.category'))->with(['status'=>'系统错误']);
     }
@@ -100,7 +101,7 @@ class CategoryController extends Controller
         ]);
         $category = Category::findOrFail($id);
         if ($category->update($request->all())){
-            return redirect(route('admin.category'))->with(['status'=>'更新成功']);
+            return redirect(route('admin.category.edit',[$id]))->with(['status'=>'更新成功']);
         }
         return redirect(route('admin.category'))->withErrors(['status'=>'系统错误']);
     }
