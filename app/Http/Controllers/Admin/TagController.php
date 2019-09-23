@@ -2,60 +2,69 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Tag;
+use App\Http\Requests\TagRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
+use App\Models\Tag;
+use Illuminate\Support\Facades\DB;
 
 class TagController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * 标签列表
+     * @return \Illuminate\Contracts\View\View
      */
     public function index()
     {
-        return view('admin.tag.index');
+        return View::make('admin.tag.index');
     }
 
+    /**
+     * 标签数据接口
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function data(Request $request)
     {
-        $res = Tag::orderBy('id','desc')->orderBy('sort','desc')->paginate($request->get('limit',30))->toArray();
+
+        $res = Tag::orderBy('sort','asc')->orderBy('id','desc')->paginate($request->get('limit',30));
         $data = [
             'code' => 0,
             'msg'   => '正在请求中...',
-            'count' => $res['total'],
-            'data'  => $res['data']
+            'count' => $res->total(),
+            'data'  => $res->items(),
         ];
-        return response()->json($data);
+        return Response::json($data);
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * 添加标签
+     * @return \Illuminate\Contracts\View\View
      */
     public function create()
     {
-        return view('admin.tag.create');
+        return View::make('admin.tag.create');
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * 添加标签
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request)
+    public function store(TagRequest $request)
     {
-        $this->validate($request,[
-            'name'  => 'required|string',
-            'sort'  => 'required|numeric'
-        ]);
-        if (Tag::create($request->all())){
-            return redirect(route('admin.tag'))->with(['status'=>'添加完成']);
+        $data = $request->all(['name','sort']);
+        try{
+            Tag::create($data);
+            return Redirect::to(URL::route('admin.tag'))->with(['success'=>'更新成功']);
+        }catch (\Exception $exception){
+            return Redirect::back()->withErrors('添加失败');
         }
-        return redirect(route('admin.tag'))->with(['status'=>'系统错误']);
     }
 
     /**
@@ -70,52 +79,56 @@ class TagController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * 更新标签
+     * @param $id
+     * @return \Illuminate\Contracts\View\View
      */
     public function edit($id)
     {
         $tag = Tag::findOrFail($id);
-        return view('admin.tag.edit',compact('tag'));
+        return View::make('admin.tag.edit',compact('tag'));
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * 更新标签
+     * @param TagRequest $request
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(TagRequest $request, $id)
     {
-        $this->validate($request,[
-            'name'  => 'required|string',
-            'sort'  => 'required|numeric'
-        ]);
         $tag = Tag::findOrFail($id);
-        if ($tag->update($request->only(['name','sort']))){
-            return redirect(route('admin.tag'))->with(['status'=>'更新成功']);
+        $data = $request->all(['name','sort']);
+        try{
+            $tag->update($data);
+            return Redirect::to(URL::route('admin.tag'))->with(['success'=>'更新成功']);
+        }catch (\Exception $exception){
+            return Redirect::back()->withErrors('更新失败');
         }
-        return redirect(route('admin.tag'))->withErrors(['status'=>'系统错误']);
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * 删除标签
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Request $request)
     {
         $ids = $request->get('ids');
-        if (empty($ids)){
-            return response()->json(['code'=>1,'msg'=>'请选择删除项']);
+        if (!is_array($ids) || empty($ids)){
+            return Response::json(['code'=>1,'msg'=>'请选择删除项']);
         }
-        if (Tag::destroy($ids)){
-            return response()->json(['code'=>0,'msg'=>'删除成功']);
+        DB::beginTransaction();
+        try{
+            //删除中间表article_tag
+            DB::table('article_tag')->whereIn('tag_id',$ids)->delete();
+            //删除主表tag
+            DB::table('tags')->whereIn('id',$ids)->delete();
+            DB::commit();
+            return Response::json(['code'=>0,'msg'=>'删除成功']);
+        }catch (\Exception $exception){
+            DB::rollback();
+            return Response::json(['code'=>1,'msg'=>'删除失败','data'=>$exception->getMessage()]);
         }
-        return response()->json(['code'=>1,'msg'=>'删除失败']);
     }
 }

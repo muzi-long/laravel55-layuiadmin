@@ -1,0 +1,11 @@
+.layout-col {
+    @apply max-w-7xl;
+    @apply px-4;
+    @apply mx-auto;
+}
+
+@screen sm {
+    .layout-col {
+        @apply px-10;
+    }
+}

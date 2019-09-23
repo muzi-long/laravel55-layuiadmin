@@ -25,7 +25,9 @@ class PermissionCreateRequest extends FormRequest
     {
         return [
             'name'  => 'required|unique:permissions|max:200',
-            'display_name'  => 'required'
+            'display_name'  => 'required',
+            'sort' => 'required|numeric',
+            'type' => 'required|in:1,2'
         ];
     }
 }

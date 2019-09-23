@@ -8,24 +8,31 @@ use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\DB;
 
 class ArticleController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * 资讯列表
+     * @return \Illuminate\Contracts\View\View
      */
     public function index()
     {
-        //分类
-        $categorys = Category::with('allChilds')->where('parent_id',0)->orderBy('sort','desc')->get();
-        return view('admin.article.index',compact('categorys'));
+        $categories = Category::with('allChilds')->where('parent_id',0)->orderBy('sort','asc')->get();
+        return View::make('admin.article.index',compact('categories'));
     }
 
+    /**
+     * 资讯数据接口
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function data(Request $request)
     {
-
         $model = Article::query();
         if ($request->get('category_id')){
             $model = $model->where('category_id',$request->get('category_id'));
@@ -33,44 +40,44 @@ class ArticleController extends Controller
         if ($request->get('title')){
             $model = $model->where('title','like','%'.$request->get('title').'%');
         }
-        $res = $model->orderBy('created_at','desc')->with(['tags','category'])->paginate($request->get('limit',30))->toArray();
+        $res = $model->with(['tags','category'])->orderBy('id','desc')->paginate($request->get('limit',30));
         $data = [
             'code' => 0,
             'msg'   => '正在请求中...',
-            'count' => $res['total'],
-            'data'  => $res['data']
+            'count' => $res->total(),
+            'data'  => $res->items(),
         ];
-        return response()->json($data);
+        return Response::json($data);
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * 添加资讯
+     * @return \Illuminate\Contracts\View\View
      */
     public function create()
     {
         //分类
-        $categorys = Category::with('allChilds')->where('parent_id',0)->orderBy('sort','desc')->get();
+        $categories = Category::with('allChilds')->where('parent_id',0)->orderBy('sort','desc')->get();
         //标签
         $tags = Tag::get();
-        return view('admin.article.create',compact('tags','categorys'));
+        return View::make('admin.article.create',compact('tags','categories'));
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * 添加资讯
+     * @param ArticleRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(ArticleRequest $request)
     {
-        $data = $request->only(['category_id','title','keywords','description','content','thumb','click']);
-        $article = Article::create($data);
-        if ($article && !empty($request->get('tags')) ){
-            $article->tags()->sync($request->get('tags'));
+        $data = $request->all();
+        try{
+            $article = Article::create($data);
+            $article->tags()->sync($request->get('tags',[]));
+            return Redirect::to(URL::route('admin.article'))->with(['success'=>'添加成功']);
+        }catch (\Exception $exception){
+            return Redirect::back()->withErrors('添加失败');
         }
-        return redirect(route('admin.article'))->with(['status'=>'添加成功']);
     }
 
     /**
@@ -85,65 +92,59 @@ class ArticleController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * 更新资讯
+     * @param $id
+     * @return \Illuminate\Contracts\View\View
      */
     public function edit($id)
     {
         $article = Article::with('tags')->findOrFail($id);
-        if (!$article){
-            return redirect(route('admin.article'))->withErrors(['status'=>'文章不存在']);
-        }
         //分类
-        $categorys = Category::with('allChilds')->where('parent_id',0)->orderBy('sort','desc')->get();
+        $categories = Category::with('allChilds')->where('parent_id',0)->orderBy('sort','asc')->get();
         //标签
         $tags = Tag::get();
         foreach ($tags as $tag){
             $tag->checked = $article->tags->contains($tag) ? 'checked' : '';
         }
-        return view('admin.article.edit',compact('article','categorys','tags'));
-
+        return View::make('admin.article.edit',compact('article','categories','tags'));
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * 更新资讯
+     * @param ArticleRequest $request
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(ArticleRequest $request, $id)
     {
         $article = Article::with('tags')->findOrFail($id);
-        $data = $request->only(['category_id','title','keywords','description','content','thumb','click']);
-        if ($article->update($data)){
+        $data = $request->all();
+        try{
+            $article->update($data);
             $article->tags()->sync($request->get('tags',[]));
-            return redirect(route('admin.article'))->with(['status'=>'更新成功']);
+            return Redirect::to(URL::route('admin.article'))->with(['success'=>'更新成功']);
+        }catch (\Exception $exception){
+            return Redirect::back()->withErrors('更新失败');
         }
-        return redirect(route('admin.article'))->withErrors(['status'=>'系统错误']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Request $request)
     {
         $ids = $request->get('ids');
-        if (empty($ids)){
-            return response()->json(['code'=>1,'msg'=>'请选择删除项']);
+        if (!is_array($ids) || empty($ids)){
+            return Response::json(['code'=>1,'msg'=>'请选择删除项']);
         }
-        foreach (Article::whereIn('id',$ids)->get() as $model){
-            //清除中间表数据
-            $model->tags()->sync([]);
-            //删除文章
-            $model->delete();
+        DB::beginTransaction();
+        try{
+            //删除中间表article_tag
+            DB::table('article_tag')->whereIn('article_id',$ids)->delete();
+            //删除主表tag
+            DB::table('articles')->whereIn('id',$ids)->delete();
+            DB::commit();
+            return Response::json(['code'=>0,'msg'=>'删除成功']);
+        }catch (\Exception $exception){
+            DB::rollback();
+            return Response::json(['code'=>1,'msg'=>'删除失败','data'=>$exception->getMessage()]);
         }
-        return response()->json(['code'=>0,'msg'=>'删除成功']);
     }
-
 }

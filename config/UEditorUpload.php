@@ -18,19 +18,40 @@ return [
     */
     'core' => [
         'route' => [
-            //'middleware' => 'auth',
+            // 'middleware' => 'auth',
         ],
 
-        'mode'=>'qiniu',//上传方式,local 为本地   qiniu 为七牛
+        'mode' => 'local',//上传方式,local 为本地   qiniu 为七牛,oss为阿里云oss,storage 为使用laravel的storage
 
         //七牛配置,若mode='qiniu',以下为必填.
-        'qiniu'=>[
-            'accessKey'=>'1JdLd1hJq8j99yKGwgPgE_p0s8PAQ3UNZIKtLXaV',
-            'secretKey'=>'e-mpwUbtfF8cv0aCUOvqimlIdexaavYtV_yjyhQG',
-            'bucket'=>'muzilong',
-            'url'=>'http://o95vn3gtk.bkt.clouddn.com',//七牛分配的CDN域名,注意带上http://
+        'qiniu' => [
+            'accessKey' => '',
+            'secretKey' => '',
+            'bucket' => '',
+            'url' => 'http://xxx.clouddn.com',//七牛分配的CDN域名,注意带上http://
 
-        ]
+        ],
+
+
+        'oss' => [
+            'driver' => 'oss',
+            'access_id' => env('ALI_ACCESS_KEY_ID', ''),//'<Your Aliyun OSS AccessKeyId>',
+            'access_key' => env('ALI_ACCESS_KEY_SECRET', ''),//'<Your Aliyun OSS AccessKeySecret>',
+            'bucket' => env('ALI_OSS_BUCKET', ''),//'<OSS bucket name>',
+            'endpoint' => env('ALI_OSS_ENDPOINT', 'oss-cn-hangzhou.aliyuncs.com'),//'<the endpoint of OSS, E.g: oss-cn-hangzhou.aliyuncs.com | custom domain, E.g:img.abc.com>', // OSS 外网节点或自定义外部域名
+//                'endpoint_internal' => env('ALI_OSS_ENDPOINT_INTERNAL','oss-cn-hangzhou-internal.aliyuncs.com'),//'<internal endpoint [OSS内网节点] 如：oss-cn-shenzhen-internal.aliyuncs.com>', // v2.0.4 新增配置属性，如果为空，则默认使用 endpoint 配置(由于内网上传有点小问题未解决，请大家暂时不要使用内网节点上传，正在与阿里技术沟通中)
+            'cdnDomain' => env('ALI_OSS_CDN_DOMAIN', ''),//'<CDN domain, cdn域名>', // 如果isCName为true, getUrl会判断cdnDomain是否设定来决定返回的url，如果cdnDomain未设置，则使用endpoint来生成url，否则使用cdn
+            'ssl' => env('ALI_OSS_SSL', false),//<true|false> // true to use 'https://' and false to use 'http://'. default is false,
+            'isCName' => env('ALI_OSS_IS_CNAME', true),//<true|false> // 是否使用自定义域名,true: 则Storage.url()会使用自定义的cdn或域名生成文件url， false: 则使用外部节点生成url
+            'debug' => false//<true|false>
+        ],
+        'storage' => [
+            'folder' => 'files',//注意不要加'/'
+            'classifyByFileType' => false,//是否根据文件类型拆分到子文件夹
+
+        ],
+
+
     ],
     /**
      * 和原 UEditor /php/config.json 配置完全相同
@@ -127,5 +148,4 @@ return [
             ".rar", ".zip", ".tar", ".gz", ".7z", ".bz2", ".cab", ".iso",
             ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pdf", ".txt", ".md", ".xml"
         ]] /* 列出的文件类型 */
-
 ];

@@ -12,3 +12,11 @@
         </div>
     </div>
 @endsection
+
+@section('script')
+    <script>
+        layui.use(['element','form'],function () {
+
+        })
+    </script>
+@endsection

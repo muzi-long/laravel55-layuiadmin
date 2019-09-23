@@ -6,7 +6,7 @@
             <h2>添加文章</h2>
         </div>
         <div class="layui-card-body">
-            <form class="layui-form" action="{{route('admin.article.store')}}" method="post">
+            <form class="layui-form" action="{{route('admin.article.store')}}" method="post" >
                 @include('admin.article._form')
             </form>
         </div>

@@ -41,16 +41,11 @@ return [
             'provider' => 'users',
         ],
 
-        'member' => [
-            'driver' => 'session',
-            'provider' => 'members',
-        ],
-
         'api' => [
             'driver' => 'token',
             'provider' => 'users',
+            'hash' => false,
         ],
-
     ],
 
     /*
@@ -74,11 +69,6 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
-        ],
-
-        'members' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Member::class,
         ],
 
         // 'users' => [

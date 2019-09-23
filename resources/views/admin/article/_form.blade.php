@@ -2,14 +2,14 @@
 <div class="layui-form-item">
     <label for="" class="layui-form-label">分类</label>
     <div class="layui-input-inline">
-        <select name="category_id" lay-verify="required">
-            <option value=""></option>
-            @foreach($categorys as $category)
+        <select name="category_id">
+            <option value="0"></option>
+            @foreach($categories as $category)
                 <option value="{{ $category->id }}" @if(isset($article->category_id)&&$article->category_id==$category->id)selected @endif >{{ $category->name }}</option>
-                @if(isset($category->allChilds)&&!$category->allChilds->isEmpty())
+                @if(isset($category->allChilds)&&$category->allChilds->isNotEmpty())
                     @foreach($category->allChilds as $child)
                         <option value="{{ $child->id }}" @if(isset($article->category_id)&&$article->category_id==$child->id)selected @endif >&nbsp;&nbsp;&nbsp;┗━━{{ $child->name }}</option>
-                        @if(isset($child->allChilds)&&!$child->allChilds->isEmpty())
+                        @if(isset($child->allChilds)&&$child->allChilds->isNotEmpty())
                             @foreach($child->allChilds as $third)
                                 <option value="{{ $third->id }}" @if(isset($article->category_id)&&$article->category_id==$third->id)selected @endif >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;┗━━{{ $third->name }}</option>
                             @endforeach
@@ -40,7 +40,7 @@
 <div class="layui-form-item">
     <label for="" class="layui-form-label">关键词</label>
     <div class="layui-input-block">
-        <input type="text" name="keywords" value="{{$article->keywords??old('keywords')}}" lay-verify="required" placeholder="请输入关键词" class="layui-input" >
+        <input type="text" name="keywords" value="{{$article->keywords??old('keywords')}}" placeholder="请输入关键词" class="layui-input" >
     </div>
 </div>
 
@@ -54,7 +54,7 @@
 <div class="layui-form-item">
     <label for="" class="layui-form-label">点击量</label>
     <div class="layui-input-block">
-        <input type="number" name="click" value="{{$article->click??mt_rand(100,500)}}" lay-verify="required|numeric"  class="layui-input" >
+        <input type="number" name="click" value="{{$article->click??mt_rand(100,500)}}" class="layui-input" >
     </div>
 </div>
 
@@ -62,33 +62,38 @@
     <label for="" class="layui-form-label">缩略图</label>
     <div class="layui-input-block">
         <div class="layui-upload">
-            <button type="button" class="layui-btn" id="uploadPic"><i class="layui-icon">&#xe67c;</i>图片上传</button>
+            <button type="button" class="layui-btn layui-btn-sm uploadPic"><i class="layui-icon">&#xe67c;</i>图片上传</button>
             <div class="layui-upload-list" >
-                <ul id="layui-upload-box" class="layui-clear">
+                <ul class="layui-upload-box layui-clear">
                     @if(isset($article->thumb))
                         <li><img src="{{ $article->thumb }}" /><p>上传成功</p></li>
                     @endif
                 </ul>
-                <input type="hidden" name="thumb" id="thumb" value="{{ $article->thumb??'' }}">
+                <input type="hidden" name="thumb" class="layui-upload-input" value="{{ $article->thumb??'' }}">
             </div>
         </div>
     </div>
 </div>
 
-@include('UEditor::head');
 <div class="layui-form-item">
     <label for="" class="layui-form-label">内容</label>
     <div class="layui-input-block">
-        <script id="container" name="content" type="text/plain">
+        <script id="container" name="content" type="text/plain" style="width: 98%">
             {!! $article->content??old('content') !!}
         </script>
     </div>
 </div>
 
+<div class="layui-form-item">
+    <label for="" class="layui-form-label">外链</label>
+    <div class="layui-input-block">
+        <input type="text" name="link" value="{{$article->link??''}}" placeholder="资讯外部链接，可为空" class="layui-input" >
+    </div>
+</div>
 
 <div class="layui-form-item">
     <div class="layui-input-block">
         <button type="submit" class="layui-btn" lay-submit="" lay-filter="formDemo">确 认</button>
-        <a  class="layui-btn" href="{{route('admin.article')}}" >返 回</a>
+        <a class="layui-btn" href="{{route('admin.article')}}" >返 回</a>
     </div>
 </div>

@@ -9,10 +9,9 @@
 <div class="layui-form-item">
     <label for="" class="layui-form-label">排序</label>
     <div class="layui-input-inline">
-        <input type="text" name="sort" value="{{ $tag->sort ?? 0 }}" lay-verify="required|number" placeholder="请输入数字" class="layui-input" >
+        <input type="number" name="sort" value="{{ $tag->sort ?? 10 }}" lay-verify="required|number" placeholder="请输入数字" class="layui-input" >
     </div>
 </div>
-
 
 <div class="layui-form-item">
     <div class="layui-input-block">

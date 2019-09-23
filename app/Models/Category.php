@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $fillable = ['name','sort','parent_id'];
+
+    protected $guarded = ['id'];
 
     //子分类
     public function childs()

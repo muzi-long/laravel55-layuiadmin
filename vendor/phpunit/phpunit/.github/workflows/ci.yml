@@ -1,0 +1,44 @@
+# https://help.github.com/en/categories/automating-your-workflow-with-github-actions
+
+on:
+  - push
+  - pull_request
+
+name: CI
+
+jobs:
+  coding-guidelines:
+    name: Coding Guidelines
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Run friendsofphp/php-cs-fixer
+        run: php7.3 ./tools/php-cs-fixer fix --diff-format=udiff --dry-run --show-progress=dots --using-cache=no --verbose
+
+  type-checker:
+    name: Type Checker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Update dependencies with composer
+        run: php7.3 ./tools/composer update --no-interaction --no-ansi --no-progress --no-suggest
+
+      - name: Run vimeo/psalm on public API
+        run: php7.3 ./tools/psalm --config=.psalm/static-analysis.xml --no-progress --show-info=false
+
+      - name: Run vimeo/psalm on internal code
+        run: php7.3 ./tools/psalm --config=.psalm/config.xml --no-progress --shepherd --show-info=false --stats
+
+  backward-compatibility:
+    name: Backward Compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Run roave/backward-compatibility-check
+        run: php7.3 ./tools/roave-backward-compatibility-check --from=8.3.3

@@ -1,0 +1,5 @@
+vendor/
+composer.lock
+grammar/kmyacc.exe
+grammar/y.output
+.phpunit.result.cache

@@ -37,7 +37,7 @@ return [
     | may even configure multiple disks of the same driver. Defaults have
     | been setup for each driver as an example of the required options.
     |
-    | Supported Drivers: "local", "ftp", "s3", "rackspace"
+    | Supported Drivers: "local", "ftp", "sftp", "s3"
     |
     */
 
@@ -55,26 +55,18 @@ return [
             'visibility' => 'public',
         ],
 
+        'uploads' => [
+            'driver' => 'local',
+            'root' => public_path('uploads/local'),
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('AWS_BUCKET'),
-        ],
-
-        'qiniu' => [
-            'driver'  => 'qiniu',
-            'domains' => [
-                'default'   => 'o95vn3gtk.bkt.clouddn.com', //你的七牛域名
-                'https'     => '',         //你的HTTPS域名
-                'custom'    => '',                //Useless 没啥用，请直接使用上面的 default 项
-            ],
-            'access_key'=> '1JdLd1hJq8j99yKGwgPgE_p0s8PAQ3UNZIKtLXaV',  //AccessKey
-            'secret_key'=> 'e-mpwUbtfF8cv0aCUOvqimlIdexaavYtV_yjyhQG',  //SecretKey
-            'bucket'    => 'muzilong',  //Bucket名字
-            'notify_url'=> '',  //持久化处理回调地址
-            'access'    => 'public'  //空间访问控制 public 或 private
+            'url' => env('AWS_URL'),
         ],
 
     ],
