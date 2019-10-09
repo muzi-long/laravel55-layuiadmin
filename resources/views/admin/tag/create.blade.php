@@ -6,7 +6,7 @@
             <h2>添加标签</h2>
         </div>
         <div class="layui-card-body">
-            <form class="layui-form" action="{{route('admin.tag.store')}}" method="post">
+            <form class="layui-form" action="{{route('admin.tag.store')}}" method="post" onsubmit="return dosubmit()">
                 @include('admin.tag._form')
             </form>
         </div>

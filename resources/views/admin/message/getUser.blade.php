@@ -68,13 +68,24 @@
                 if (hasCheck.data.length>0){
                     var type = $("select[name='user_type']").val();
                     var obj = parent.$(".userBox"+type);
+                    var check = true;
                     $.each(hasCheck.data,function (index,item) {
-                        if (obj.find("#"+item.uuid).length<=0){
-                            var html ='<li id="'+item.uuid+'" class="li'+type+'">'+item.name+'<i title="移除" onclick="removeLi(this)">&times;</i><input type="hidden" name="user['+type+'][]" value="'+item.uuid+'"></li>'
-                            obj.append(html)
+                        if (obj.find("#"+item.uuid).length>0){
+                            check = false;
+                            layer.msg(item.name+'已添加,请取消后再点击确定！');
+                            return false;
                         }
-                    })
-                    layer.msg('添加完成')
+                    });
+                    if(check){
+                        $.each(hasCheck.data,function (index,item) {
+                            if (obj.find("#"+item.uuid).length<=0){
+                                var html ='<li id="'+item.uuid+'" class="li'+type+'">'+item.name+'<i title="移除" onclick="removeLi(this)">&times;</i><input type="hidden" name="user['+type+'][]" value="'+item.uuid+'"></li>'
+                                obj.append(html)
+                            }
+                        })
+                        layer.msg('添加完成！')
+                    }
+
                 }
             })
         })

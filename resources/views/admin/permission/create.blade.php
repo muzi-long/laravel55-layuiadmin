@@ -12,7 +12,3 @@
         </div>
     </div>
 @endsection
-
-@section('script')
-    @include('admin.permission._js')
-@endsection

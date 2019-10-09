@@ -6,7 +6,7 @@
             <h2>更新文章</h2>
         </div>
         <div class="layui-card-body">
-            <form class="layui-form" action="{{route('admin.article.update',['id'=>$article->id])}}" method="post">
+            <form class="layui-form" action="{{route('admin.article.update',['id'=>$article->id])}}" method="post" onsubmit="return dosubmit()">
                 {{ method_field('put') }}
                 @include('admin.article._form')
             </form>

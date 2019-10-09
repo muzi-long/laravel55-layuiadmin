@@ -42,8 +42,8 @@ class MessageController extends Controller
                 $model = $model->whereBetween('created_at',[$res['start_time'],$res['end_time']]);
             }
         }
-        $res = $model->orderBy('read','asc')->orderBy('id','desc')->paginate($request->get('limit',30))->toArray();
-        $users = User::pluck('name','uuid');
+        $res = $model->orderBy($request->get('field','read'),$request->get('order','asc'))->paginate($request->get('limit',30))->toArray();
+        $users = User::pluck('realname','uuid');
         $member = Member::pluck('name','uuid');
         foreach ($res['data'] as &$d) {
             switch ($d['flag']){
@@ -96,13 +96,23 @@ class MessageController extends Controller
     {
         if ($request->ajax()){
             //默认后台用户
-            $model = new User();
-            if ($request->get('user_type')==3){
-                $model = new Member();
-            }
+            
             $keywords = $request->get('keywords');
             if ($keywords){
-                $model = $model->where('name','like','%'.$keywords.'%')->orWhere('phone','like','%'.$keywords.'%');
+                if ($request->get('user_type')==3){
+                    $model = new Member();
+                    $model=$model->where('name','like','%'.$keywords.'%')->orWhere('phone','like','%'.$keywords.'%');
+                }else{
+                    $model = new User();
+                    $model = $model->selectRaw("realname AS name")->where('realname','like','%'.$keywords.'%')->orWhere('phone','like','%'.$keywords.'%');
+                }
+            }else{
+                if ($request->get('user_type')==3){
+                    $model = new Member();
+                }else{
+                    $model = new User();
+                    $model = $model->select(['id','uuid','phone'])->selectRaw("realname AS name");
+                }
             }
             $res = $model->orderBy('id','desc')->paginate($request->get('limit',30))->toArray();
             $data = [
@@ -135,8 +145,8 @@ class MessageController extends Controller
     public function store(Request $request)
     {
         $this->validate($request,[
-            'title' => 'required|min:4|max:200',
-            'content' => 'required|min:4|max:400'
+            'title' => 'required',
+            'content' => 'required'
         ]);
         if (empty($request->get('user'))){
             return back()->withInput()->with(['status'=>'请选择用户']);
@@ -227,7 +237,7 @@ class MessageController extends Controller
     {
         if ($request->ajax()){
             $res = Message::where('accept_uuid',auth()->user()->uuid)->orderBy('read','asc')->orderBy('id','desc')->paginate($request->get('limit',30))->toArray();
-            $users = User::pluck('name','uuid');
+            $users = User::pluck('realname','uuid');
             $member = Member::pluck('name','uuid');
             foreach ($res['data'] as &$d) {
                 switch ($d['flag']){

@@ -39,7 +39,7 @@ class UserController extends Controller
      */
     public function store(UserCreateRequest $request)
     {
-        $data = $request->all();
+        $data =  $request->all();
         $data['uuid'] = \Faker\Provider\Uuid::uuid();
         $data['password'] = bcrypt($data['password']);
         if (User::create($data)){
@@ -86,7 +86,7 @@ class UserController extends Controller
             $data['password'] = bcrypt($request->get('password'));
         }
         if ($user->update($data)){
-            return redirect()->to(route('admin.user'))->with(['status'=>'更新用户成功']);
+            return redirect()->to(route('admin.user.edit',[$id]))->with(['status'=>'更新用户成功']);
         }
         return redirect()->to(route('admin.user'))->withErrors('系统错误');
     }
@@ -131,7 +131,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $roles = $request->get('roles',[]);
        if ($user->syncRoles($roles)){
-           return redirect()->to(route('admin.user'))->with(['status'=>'更新用户角色成功']);
+           return redirect()->to(route('admin.user.role',[$id]))->with(['status'=>'更新用户角色成功']);
        }
         return redirect()->to(route('admin.user'))->withErrors('系统错误');
     }
@@ -165,14 +165,15 @@ class UserController extends Controller
     public function assignPermission(Request $request,$id)
     {
         $user = User::findOrFail($id);
+
         $permissions = $request->get('permissions');
 
         if (empty($permissions)){
             $user->permissions()->detach();
-            return redirect()->to(route('admin.user'))->with(['status'=>'已更新用户直接权限']);
+            return redirect()->to(route('admin.user.permission',[$id]))->with(['status'=>'已更新用户直接权限']);
         }
         $user->syncPermissions($permissions);
-        return redirect()->to(route('admin.user'))->with(['status'=>'已更新用户直接权限']);
+        return redirect()->to(route('admin.user.permission',[$id]))->with(['status'=>'已更新用户直接权限']);
     }
 
 }

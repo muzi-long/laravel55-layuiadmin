@@ -20,7 +20,7 @@ class PositionController extends Controller
 
     public function data(Request $request)
     {
-        $res = Position::orderBy('sort','desc')->orderBy('id','desc')->paginate($request->get('limit',30))->toArray();
+        $res = Position::orderBy($request->get('field','sort'),$request->get('order','desc'))->paginate($request->get('limit',30))->toArray();
         $data = [
             'code' => 0,
             'msg'   => '正在请求中...',
@@ -99,7 +99,7 @@ class PositionController extends Controller
         ]);
         $position = Position::findOrFail($id);
         if ($position->update($request->only(['name','sort']))){
-            return redirect(route('admin.position'))->with(['status'=>'更新成功']);
+            return redirect(route('admin.position.edit',[$id]))->with(['status'=>'更新成功']);
         }
         return redirect(route('admin.position'))->withErrors(['status'=>'系统错误']);
     }

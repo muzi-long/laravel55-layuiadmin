@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Site;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
-
+use App\Http\Requests\Common;
+use Validator;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -23,6 +25,12 @@ class AppServiceProvider extends ServiceProvider
             $unreadMessage = \App\Models\Message::where('read',1)->where('accept_uuid',auth()->user()->uuid)->count();
             $view->with('menus',$menus);
             $view->with('unreadMessage',$unreadMessage);
+        });
+        $all_config = Site::pluck('value','key');
+        view()->share('all_config',$all_config);
+        Validator::resolver(function($translator, $data, $rules, $messages)
+        {
+            return new Common($translator, $data, $rules, $messages);
         });
     }
 

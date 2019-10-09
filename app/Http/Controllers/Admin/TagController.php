@@ -20,7 +20,8 @@ class TagController extends Controller
 
     public function data(Request $request)
     {
-        $res = Tag::orderBy('id','desc')->orderBy('sort','desc')->paginate($request->get('limit',30))->toArray();
+        
+        $res = Tag::orderBy($request->get('field','sort'),$request->get('order','desc'))->orderBy('id','asc')->paginate($request->get('limit',30))->toArray();
         $data = [
             'code' => 0,
             'msg'   => '正在请求中...',

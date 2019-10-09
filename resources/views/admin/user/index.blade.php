@@ -44,20 +44,37 @@
             var layer = layui.layer;
             var form = layui.form;
             var table = layui.table;
-
             //用户表格初始化
             var dataTable = table.render({
                 elem: '#dataTable'
                 ,height: 500
                 ,url: "{{ route('admin.data') }}" //数据接口
                 ,where:{model:"user"}
-                ,page: true //开启分页
+                ,page: true
+                ,done: function(res, curr, count){
+                    var page_now;
+                    //接口回调，处理一些和表格相关的辅助事项
+                    if(res.data.length==0 && count>0){
+                        if(curr-1>0){
+                            page_now =curr-1;
+                        }else{
+                            page_now = 1 ;
+                        }
+                        dataTable.reload({
+                            page: {
+                                curr: page_now //重新从第 1 页开始
+                            }
+                        });
+                    }
+
+                }
                 ,cols: [[ //表头
                     {checkbox: true,fixed: true}
                     ,{field: 'id', title: 'ID', sort: true,width:80}
-                    ,{field: 'name', title: '用户名'}
-                    ,{field: 'email', title: '邮箱'}
-                    ,{field: 'phone', title: '电话'}
+                    ,{field: 'username', title: '登录账号'}
+                    ,{field: 'realname', title: '真实姓名'}
+                    ,{field: 'email', title: '电子邮箱'}
+                    ,{field: 'phone', title: '联系电话'}
                     ,{field: 'created_at', title: '创建时间'}
                     ,{field: 'updated_at', title: '更新时间'}
                     ,{fixed: 'right', width: 320, align:'center', toolbar: '#options'}
@@ -73,17 +90,42 @@
                         $.post("{{ route('admin.user.destroy') }}",{_method:'delete',ids:[data.id]},function (result) {
                             if (result.code==0){
                                 obj.del(); //删除对应行（tr）的DOM结构
+                                dataTable.reload();
                             }
                             layer.close(index);
                             layer.msg(result.msg,{icon:6})
                         });
                     });
                 } else if(layEvent === 'edit'){
-                    location.href = '/admin/user/'+data.id+'/edit';
+                    layer.open({
+                        type: 2,
+                        title:'编辑用户',
+                        shadeClose:true, area: ['100%', '100%'],
+                        content: '/admin/user/'+data.id+'/edit',
+                        end:function () {
+                            dataTable.reload();
+                        }
+                    });
                 } else if (layEvent === 'role'){
-                    location.href = '/admin/user/'+data.id+'/role';
+                    layer.open({
+                        type: 2,
+                        title:'编辑角色',
+                        shadeClose:true, area: ['100%', '100%'],
+                        content: '/admin/user/'+data.id+'/role',
+                        end:function () {
+                            dataTable.reload();
+                        }
+                    });
                 } else if (layEvent === 'permission'){
-                    location.href = '/admin/user/'+data.id+'/permission';
+                    layer.open({
+                        type: 2,
+                        title:'编辑权限',
+                        shadeClose:true, area: ['100%', '100%'],
+                        content: '/admin/user/'+data.id+'/permission',
+                        end:function () {
+                            dataTable.reload();
+                        }
+                    });
                 }
             });
 

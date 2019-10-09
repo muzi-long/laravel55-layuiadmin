@@ -6,7 +6,7 @@
             <h2>更新标签</h2>
         </div>
         <div class="layui-card-body">
-            <form class="layui-form" action="{{route('admin.tag.update',['id'=>$tag->id])}}" method="post">
+            <form class="layui-form" action="{{route('admin.tag.update',['id'=>$tag->id])}}" method="post" onsubmit="return dosubmit()">
                 {{ method_field('put') }}
                 @include('admin.tag._form')
             </form>

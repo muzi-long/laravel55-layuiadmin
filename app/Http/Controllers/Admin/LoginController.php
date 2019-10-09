@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
+use App\Models\Site;
+use App\Models\LoginLog;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -17,7 +18,8 @@ class LoginController extends Controller
      */
     public function showLoginForm()
     {
-        return view('admin.login_register.login');
+        $config = Site::pluck('value','key');
+        return view('admin.login_register.login',compact('config',$config));
     }
 
     /**
@@ -61,6 +63,27 @@ class LoginController extends Controller
     protected function guard()
     {
         return Auth::guard();
+    }
+    protected function validateLogin(Request $request){
+        $this->validate($request, [
+            $this->username() => 'required|string',
+            'password' => 'required|string',
+            'captcha' => 'required|captcha',
+        ],[
+            'captcha.required' => '请填写验证码',
+            'captcha.captcha' => '验证码错误',
+        ]);
+    }
+
+    protected function authenticated(Request $request, $user)
+    {
+        $data = [
+            'user_id' => $user->id,
+            'username' => $user->username,
+            'realname' => $user->realname,
+            'ip' => $request->getClientIp()
+        ];
+        LoginLog::create($data);
     }
 
 }

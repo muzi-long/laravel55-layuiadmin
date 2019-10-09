@@ -42,7 +42,7 @@
         //普通图片上传
         var uploadInst = upload.render({
             elem: '#uploadPic'
-            ,url: '{{ route("uploadImg") }}'
+            ,url: '{{ route("upload.image") }}'
             ,multiple: false
             ,data:{"_token":"{{ csrf_token() }}"}
             ,before: function(obj){

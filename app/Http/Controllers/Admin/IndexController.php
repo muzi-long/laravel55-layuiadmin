@@ -28,10 +28,12 @@ class IndexController extends Controller
     {
         return view('admin.index.index');
     }
+
     public function index1()
     {
         return view('admin.index.index1');
     }
+    
     public function index2()
     {
         return view('admin.index.index2');
@@ -65,7 +67,8 @@ class IndexController extends Controller
             'code' => 0,
             'msg' => '正在请求中...',
             'count' => $res['total'],
-            'data' => $res['data']
+            'data' => $res['data'],
+            'parent_id'=>$request->get('parent_id', 0),
         ];
         return response()->json($data);
     }

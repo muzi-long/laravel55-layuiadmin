@@ -17,7 +17,6 @@ class PermissionController extends Controller
      */
     public function index()
     {
-
         return view('admin.permission.index');
     }
 
@@ -26,10 +25,11 @@ class PermissionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
+        $permission_id =$request->input('parent_id');
         $permissions = $this->tree();
-        return view('admin.permission.create',compact('permissions'));
+        return view('admin.permission.create',compact('permissions','permission_id'));
     }
 
 
@@ -41,7 +41,7 @@ class PermissionController extends Controller
      */
     public function store(PermissionCreateRequest $request)
     {
-        $data = $request->all();
+        $data = $request->all();;
         if (Permission::create($data)){
             return redirect()->to(route('admin.permission'))->with(['status'=>'添加成功']);
         }
@@ -82,9 +82,9 @@ class PermissionController extends Controller
     public function update(PermissionUpdateRequest $request, $id)
     {
         $permission = Permission::findOrFail($id);
-        $data = $request->all();
+        $data =  $request->all();
         if ($permission->update($data)){
-            return redirect()->to(route('admin.permission'))->with(['status'=>'更新权限成功']);
+            return redirect()->to(route('admin.permission.edit',[$id]))->with(['status'=>'更新权限成功']);
         }
         return redirect()->to(route('admin.permission'))->withErrors('系统错误');
     }

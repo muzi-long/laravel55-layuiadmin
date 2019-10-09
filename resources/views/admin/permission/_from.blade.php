@@ -3,23 +3,43 @@
 <div class="layui-form-item">
     <label for="" class="layui-form-label">父级</label>
     <div class="layui-input-block">
-        <select name="parent_id" lay-search>
-            <option value="0">顶级权限</option>
-            @forelse($permissions as $perm)
-                <option value="{{$perm['id']}}" {{ isset($permission->id) && $perm['id'] == $permission->parent_id ? 'selected' : '' }} >{{$perm['display_name']}}</option>
-                @if(isset($perm['_child']))
-                    @foreach($perm['_child'] as $childs)
-                        <option value="{{$childs['id']}}" {{ isset($permission->id) && $childs['id'] == $permission->parent_id ? 'selected' : '' }} >&nbsp;&nbsp;┗━━{{$childs['display_name']}}</option>
-                        @if(isset($childs['_child']))
-                            @foreach($childs['_child'] as $lastChilds)
-                                <option value="{{$lastChilds['id']}}" {{ isset($permission->id) && $lastChilds['id'] == $permission->parent_id ? 'selected' : '' }} >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;┗━━{{$lastChilds['display_name']}}</option>
-                            @endforeach
-                        @endif
-                    @endforeach
-                @endif
-            @empty
-            @endforelse
-        </select>
+        @if(isset($permission_id))
+            <select name="parent_id" lay-search>
+                <option value="0">顶级权限</option>
+                @forelse($permissions as $perm)
+                    <option value="{{$perm['id']}}" {{ $perm['id'] == $permission_id? 'selected' : '' }} >{{$perm['display_name']}}</option>
+                    @if(isset($perm['_child']))
+                        @foreach($perm['_child'] as $childs)
+                            <option value="{{$childs['id']}}" {{ $childs['id'] == $permission_id ? 'selected' : '' }} >┗━━{{$childs['display_name']}}</option>
+                            @if(isset($childs['_child']))
+                                @foreach($childs['_child'] as $lastChilds)
+                                    <option value="{{$lastChilds['id']}}" {{ $lastChilds['id'] == $permission_id ? 'selected' : '' }} >┗━━━━{{$lastChilds['display_name']}}</option>
+                                @endforeach
+                            @endif
+                        @endforeach
+                    @endif
+                @empty
+                @endforelse
+            </select>
+            @else
+            <select name="parent_id" lay-search>
+                <option value="0">顶级权限</option>
+                @forelse($permissions as $perm)
+                    <option value="{{$perm['id']}}" {{ isset($permission->id) && $perm['id'] == $permission->parent_id ? 'selected' : '' }} >{{$perm['display_name']}}</option>
+                    @if(isset($perm['_child']))
+                        @foreach($perm['_child'] as $childs)
+                            <option value="{{$childs['id']}}" {{ isset($permission->id) && $childs['id'] == $permission->parent_id ? 'selected' : '' }} >┗━━{{$childs['display_name']}}</option>
+                            @if(isset($childs['_child']))
+                                @foreach($childs['_child'] as $lastChilds)
+                                    <option value="{{$lastChilds['id']}}" {{ isset($permission->id) && $lastChilds['id'] == $permission->parent_id ? 'selected' : '' }} >┗━━━━{{$lastChilds['display_name']}}</option>
+                                @endforeach
+                            @endif
+                        @endforeach
+                    @endif
+                @empty
+                @endforelse
+            </select>
+        @endif
     </div>
 </div>
 
@@ -45,7 +65,7 @@
 <div class="layui-form-item">
     <label for="" class="layui-form-label">图标</label>
     <div class="layui-input-inline">
-        <input class="layui-input" type="hidden" name="icon_id" >
+        <input class="layui-input" type="hidden" name="icon_id" value="{{$permission->icon_id??''}}">
     </div>
     <div class="layui-form-mid layui-word-aux" id="icon_box">
         <i class="layui-icon {{$permission->icon->class??''}}"></i> {{$permission->icon->name??''}}
@@ -57,7 +77,11 @@
 <div class="layui-form-item">
     <div class="layui-input-block">
         <button type="submit" class="layui-btn" lay-submit="" >确 认</button>
-        <a href="{{route('admin.permission')}}" class="layui-btn"  >返 回</a>
+        <div  class="layui-btn close-iframe" onclick="close_parent('{{$permission->name ??''}}','/admin/permission')">关闭</div>
     </div>
 </div>
+@section('script')
+    @include('admin.permission._js')
+    @include('admin.common_edit')
+@endsection
 

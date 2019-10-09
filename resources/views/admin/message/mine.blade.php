@@ -19,7 +19,11 @@
                 </div>
             </script>
             <script type="text/html" id="read">
-                <input @{{# if(d.read==2){ }}disabled@{{# } }} message-id="@{{ d.id }}" type="checkbox" @{{# if(d.read==1){ }}lay-filter="read"@{{# } }} lay-skin="switch" lay-text="未读|已读" @{{ d.read==1?'checked':'' }} >
+                @{{# if(d.read==1){ }}
+                <input lay-filter="read" message-id="@{{ d.id }}" type="checkbox" lay-skin="switch" lay-text="未读|已读" @{{ d.read==1?'checked':'' }} >
+                @{{# }else if(d.read==2){ }}
+                <input disabled="disabled" message-id="@{{ d.id }}" type="checkbox" lay-skin="switch" lay-text="未读|已读" @{{ d.read==1?'checked':'' }} >
+                @{{# } }}
             </script>
         </div>
     </div>
@@ -28,16 +32,33 @@
 @section('script')
     @can('message.message')
         <script>
-            layui.use(['layer','table','form'],function () {
+            layui.use(['layer','table','form','laydate'],function () {
                 var layer = layui.layer;
                 var form = layui.form;
                 var table = layui.table;
+               
                 //用户表格初始化
                 var dataTable = table.render({
                     elem: '#dataTable'
                     ,height: 500
                     ,url: "{{ route('admin.message.mine') }}" //数据接口
                     ,page: true //开启分页
+                    ,done: function(res, curr, count){
+                        //接口回调，处理一些和表格相关的辅助事项
+                        if(res.data.length==0 && count>0){
+                            var page_now;
+                            if(curr-1>0){
+                                page_now =curr-1;
+                            }else{
+                                page_now = 1 ;
+                            }
+                            dataTable.reload({
+                                page: {
+                                    curr: page_now //重新从第 1 页开始
+                                }
+                            });
+                        }
+                    }
                     ,cols: [[ //表头
                         {checkbox: true,fixed: true}
                         ,{field: 'id', title: 'ID', sort: true,width:80}
@@ -59,6 +80,7 @@
                             $.post("{{ route('admin.message.destroy') }}",{_method:'delete',ids:[data.id]},function (result) {
                                 if (result.code==0){
                                     obj.del(); //删除对应行（tr）的DOM结构
+                                    dataTable.reload();
                                 }
                                 layer.close(index);
                                 layer.msg(result.msg)

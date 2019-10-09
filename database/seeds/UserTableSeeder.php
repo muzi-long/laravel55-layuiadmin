@@ -81,6 +81,24 @@ class UserTableSeeder extends Seeder
                             ['name' => 'system.permission.destroy', 'display_name' => '删除权限','route'=>'admin.permission.destroy'],
                         ]
                     ],
+                    [
+                        'name' => 'system.login_log',
+                        'display_name' => '登录日志管理',
+                        'route' => 'admin.login_log',
+                        'icon_id' => '12',
+                        'child' => [
+                            //['name' => 'system.login_log.destroy', 'display_name' => '删除登录日志','route'=>'admin.login_log.destroy'],
+                        ]
+                    ],
+                    [
+                        'name' => 'system.operation_log',
+                        'display_name' => '操作日志管理',
+                        'route' => 'admin.operation_log',
+                        'icon_id' => '12',
+                        'child' => [
+                            //['name' => 'system.operation_log.destroy', 'display_name' => '删除操作日志','route'=>'admin.operation_log.destroy'],
+                        ]
+                    ],
                 ]
             ],
             [
@@ -205,6 +223,25 @@ class UserTableSeeder extends Seeder
                         ]
                     ],
                 ]
+            ],
+            [
+                'name' => 'districts.manage',
+                'display_name' => '地区管理',
+                'route' => '',
+                'icon_id' => '104',
+                'child' => [
+                    [
+                        'name' => 'districts.dislist',
+                        'display_name' => '地区列表',
+                        'route' => 'admin.dislist',
+                        'icon_id' => '1',
+                        'child' => [
+                            ['name' => 'districts.dislist.edit', 'display_name' => '地区编辑','route'=>'admin.dislist.edit'],
+                            ['name' => 'districts.dislist.create', 'display_name' => '地区添加','route'=>'admin.dislist.create'],
+                            ['name' => 'districts.dislist.destroy', 'display_name' => '地区删除','route'=>'admin.dislist.destroy'],
+                        ]
+                    ],
+                ]
             ]
         ];
 
@@ -269,5 +306,7 @@ class UserTableSeeder extends Seeder
         foreach ($roles as $role) {
             \App\Models\Role::create($role);
         }
+        //用户
+ 
     }
 }
