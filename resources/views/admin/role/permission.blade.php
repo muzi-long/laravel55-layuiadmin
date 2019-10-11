@@ -6,7 +6,7 @@
             <h2>分配权限</h2>
         </div>
         <div class="layui-card-body">
-            <form action="{{route('admin.role.assignPermission',['role'=>$role])}}" method="post" class="layui-form">
+            <form action="{{route('admin.role.assignPermission',['id'=>$role->id])}}" method="post" class="layui-form">
                 {{csrf_field()}}
                 {{method_field('put')}}
                 <div class="layui-form-item">
